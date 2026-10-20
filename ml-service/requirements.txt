@@ -1,0 +1,8 @@
+# ML inference service (DIP-26). Planned dependencies.
+fastapi>=0.111
+uvicorn[standard]>=0.30
+pydantic>=2.7
+torch>=2.2
+transformers>=4.40
+sentencepiece>=0.2
+onnxruntime>=1.18   # optional optimisation (DOC-07 §7.9.1)

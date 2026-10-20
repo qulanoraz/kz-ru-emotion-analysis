@@ -1,0 +1,7 @@
+# Tooling for documentation checks and tests at pre-defense-1 (DIP-13, DIP-15, DIP-17)
+pytest>=8.0
+pyyaml>=6.0
+jsonschema>=4.21
+markdown>=3.5        # scripts/build_report.py
+playwright>=1.44     # scripts/build_report.py, scripts/render_mockups.py (run `playwright install chromium` once)
+ruff>=0.5

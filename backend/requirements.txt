@@ -1,0 +1,16 @@
+# Backend API and batch worker (DIP-30…DIP-35). Planned dependencies; pinned when implementation starts.
+fastapi>=0.111
+uvicorn[standard]>=0.30
+pydantic>=2.7
+sqlalchemy>=2.0
+alembic>=1.13
+psycopg[binary]>=3.1
+celery>=5.4
+redis>=5.0
+httpx>=0.27
+pandas>=2.2
+openpyxl>=3.1
+argon2-cffi>=23.1
+# tests
+pytest>=8.0
+locust>=2.29

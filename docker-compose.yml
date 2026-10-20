@@ -1,0 +1,48 @@
+# Docker Compose stack (DOC-07 §7.10). Status at pre-defense-1: SKELETON.
+# Infrastructure services (postgres, redis) work now; application services are added by
+# DIP-26 (ml-service), DIP-31 (backend), DIP-33 (worker), DIP-36 (frontend), DIP-39 (nginx).
+#
+#   cp .env.example .env
+#   docker compose up -d postgres redis
+
+services:
+  postgres:
+    image: postgres:16
+    env_file: .env
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"            # exposed for local development only
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER}"]
+      interval: 10s
+      retries: 5
+    restart: unless-stopped
+
+  redis:
+    image: redis:7
+    restart: unless-stopped
+
+  # --- planned services (uncomment when the corresponding DIP task is done) ---
+  # ml-service:              # DIP-26
+  #   build: ./ml-service
+  #   env_file: .env
+  #   volumes: ["models:/models:ro"]
+  # backend:                 # DIP-31
+  #   build: ./backend
+  #   env_file: .env
+  #   depends_on: [postgres, redis, ml-service]
+  #   volumes: ["uploads:/data/uploads"]
+  # worker:                  # DIP-33
+  #   build: ./backend
+  #   command: celery -A app.worker worker --concurrency 2 --beat
+  #   env_file: .env
+  #   depends_on: [postgres, redis, ml-service]
+  #   volumes: ["uploads:/data/uploads"]
+  # frontend / nginx:        # DIP-36, DIP-39
+  #   ports: ["80:80", "443:443"]
+
+volumes:
+  pgdata:
+  uploads:
+  models:

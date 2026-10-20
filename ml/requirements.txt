@@ -1,0 +1,11 @@
+# ML/NLP workstream (DIP-20…DIP-29). Versions are pinned at the first training run (MLR-01).
+torch>=2.2
+transformers>=4.40
+datasets>=2.19
+evaluate>=0.4
+scikit-learn>=1.4
+pandas>=2.2
+numpy>=1.26
+pyyaml>=6.0
+openpyxl>=3.1
+sentencepiece>=0.2
