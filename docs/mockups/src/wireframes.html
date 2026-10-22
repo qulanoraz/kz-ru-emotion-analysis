@@ -1,0 +1,359 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>KZ-RU Emotion Analysis — wireframes (DOC-08)</title>
+<style>
+  :root{
+    --ink:#1f2430; --muted:#6b7280; --line:#cfd4dc; --soft:#f3f4f6; --panel:#ffffff;
+    --accent:#2f5bd3; --accent-soft:#e6ecfb;
+    --joy:#3a9d5d; --sadness:#5a7bb5; --anger:#c8483b; --fear:#8a5cb8; --surprise:#d39a2b; --neutral:#9aa1ab;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:#e9ebef;font:14px/1.45 "Inter","Segoe UI",Roboto,Arial,sans-serif;color:var(--ink)}
+  .screen{width:1280px;margin:24px auto;background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  .tag{font:600 11px/1 monospace;color:var(--muted);letter-spacing:.06em}
+  header{display:flex;align-items:center;gap:28px;padding:14px 24px;border-bottom:1px solid var(--line);background:#fafbfc}
+  .logo{font-weight:700}
+  .logo small{font-weight:400;color:var(--muted);margin-left:6px}
+  nav{display:flex;gap:18px;color:var(--muted)}
+  nav b{color:var(--ink);border-bottom:2px solid var(--accent);padding-bottom:4px}
+  .user{margin-left:auto;color:var(--muted);display:flex;gap:14px;align-items:center}
+  .lang{border:1px solid var(--line);border-radius:6px;padding:2px 8px;font-size:12px}
+  main{padding:24px 28px}
+  h1{font-size:20px;margin:0 0 4px}
+  .sub{color:var(--muted);margin-bottom:18px}
+  .row{display:flex;gap:20px}
+  .col{flex:1;min-width:0}
+  .card{border:1px solid var(--line);border-radius:8px;padding:16px;background:var(--panel)}
+  .card h3{margin:0 0 10px;font-size:14px}
+  .btn{display:inline-block;padding:8px 16px;border-radius:6px;border:1px solid var(--line);background:var(--soft);font-weight:600}
+  .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+  .btn.ghost{background:none}
+  .input{border:1px solid var(--line);border-radius:6px;padding:9px 12px;background:#fff;color:var(--muted)}
+  textarea.input{width:100%;height:120px;resize:none;font:inherit;color:var(--ink)}
+  .drop{border:2px dashed #aab3c2;border-radius:10px;padding:34px;text-align:center;background:#fafbfd}
+  .drop .big{font-size:16px;font-weight:600;margin:8px 0}
+  .muted{color:var(--muted)}
+  table{width:100%;border-collapse:collapse}
+  th,td{text-align:left;padding:9px 10px;border-bottom:1px solid #e5e7eb;vertical-align:top}
+  th{font-size:12px;color:var(--muted);font-weight:600;background:#fafbfc}
+  .chip{display:inline-block;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:600;color:#fff}
+  .c-joy{background:var(--joy)} .c-sadness{background:var(--sadness)} .c-anger{background:var(--anger)}
+  .c-fear{background:var(--fear)} .c-surprise{background:var(--surprise)} .c-neutral{background:var(--neutral)}
+  .pill{display:inline-block;padding:2px 8px;border-radius:6px;font-size:12px;border:1px solid var(--line);background:#fff}
+  .note{position:relative;background:#fff8d6;border:1px solid #e9d27a;border-radius:6px;padding:6px 10px;font-size:12px;color:#5d4b00}
+  .note b{font-family:monospace}
+  .callout{display:inline-block;width:20px;height:20px;border-radius:50%;background:#e9d27a;color:#5d4b00;font:700 12px/20px sans-serif;text-align:center;margin-right:6px}
+  .bar{height:10px;border-radius:5px;background:#e5e7eb;overflow:hidden}
+  .bar > i{display:block;height:100%}
+  .hbar{display:flex;align-items:center;gap:10px;margin:7px 0}
+  .hbar .lab{width:90px}
+  .hbar .track{flex:1;height:18px;background:#f0f1f4;border-radius:4px;overflow:hidden}
+  .hbar .track i{display:block;height:100%}
+  .hbar .val{width:92px;text-align:right;color:var(--muted);font-variant-numeric:tabular-nums}
+  .kpi{display:flex;gap:16px;margin-bottom:18px}
+  .kpi .card{flex:1}
+  .kpi .num{font-size:24px;font-weight:700;margin-top:4px}
+  .stack{display:flex;height:22px;border-radius:5px;overflow:hidden}
+  .stack i{display:block;height:100%}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:8px}
+  .legend span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px;background:var(--c)}
+  .filters{display:flex;gap:10px;align-items:center;margin-bottom:12px;flex-wrap:wrap}
+  .select{border:1px solid var(--line);border-radius:6px;padding:6px 10px;background:#fff}
+  .select.active{border-color:var(--accent);background:var(--accent-soft);color:var(--accent);font-weight:600}
+  .steps{display:flex;gap:8px;margin-bottom:18px}
+  .steps div{flex:1;padding:8px 12px;border-radius:6px;background:var(--soft);color:var(--muted);font-weight:600;font-size:13px}
+  .steps .on{background:var(--accent-soft);color:var(--accent)}
+  .steps .done{background:#e7f4ec;color:#2c7a4b}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .colbars{display:flex;align-items:flex-end;gap:18px;height:170px;padding:0 8px;border-bottom:1px solid var(--line)}
+  .colbars .wk{flex:1;display:flex;flex-direction:column-reverse;height:100%}
+  .colbars .wk i{display:block}
+  .xlabels{display:flex;gap:18px;padding:4px 8px 0;font-size:11px;color:var(--muted)}
+  .xlabels span{flex:1;text-align:center}
+  .examples li{margin:6px 0}
+  .pager{display:flex;justify-content:space-between;align-items:center;margin-top:12px;color:var(--muted)}
+  .prog{height:14px;border-radius:7px;background:#e5e7eb;overflow:hidden}
+  .prog i{display:block;height:100%;width:41.6%;background:var(--accent)}
+  .mono{font-family:ui-monospace,Consolas,monospace;font-size:12px}
+</style>
+</head>
+<body>
+
+<!-- ================= SCR-01 Single text analysis ================= -->
+<section class="screen" id="scr-01">
+  <header>
+    <div class="logo">KZ-RU Emotions<small>v1.0</small></div>
+    <nav><b>Анализ текста</b><span>Пакетный анализ</span><span>История</span><span>Администрирование</span></nav>
+    <div class="user"><span class="lang">RU ▾</span>analyst@example.kz · Выйти</div>
+  </header>
+  <main>
+    <div class="tag">SCR-01 · UC-01 · FR-01, FR-02, FR-03, FR-04</div>
+    <h1>Анализ одного текста</h1>
+    <div class="sub">Казахский, русский или смешанный текст, до 2 000 символов</div>
+    <div class="row">
+      <div class="col">
+        <div class="card">
+          <h3>Текст</h3>
+          <textarea class="input">Доставка вообще кешікті, курьер телефон алмады, очень недоволен</textarea>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px">
+            <span class="muted">63 / 2 000 · <label><input type="checkbox"> сохранить текст в журнале</label></span>
+            <span class="btn primary">Анализировать</span>
+          </div>
+          <div class="note" style="margin-top:12px"><span class="callout">1</span>Пустой текст или &gt; 2 000 символов → сообщение под полем (коды <b>TEXT_EMPTY</b>, <b>TEXT_TOO_LONG</b>); кнопка неактивна.</div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="card">
+          <h3>Результат</h3>
+          <div style="display:flex;gap:10px;align-items:center;margin-bottom:12px">
+            <span class="chip c-anger" style="font-size:14px;padding:4px 12px">Гнев · anger</span>
+            <span class="pill">Тональность: негативная</span>
+            <span class="pill">Язык: смешанный (kk + ru)</span>
+          </div>
+          <div class="muted" style="margin-bottom:6px">Уверенность модели: <b style="color:var(--ink)">74 %</b></div>
+          <div class="hbar"><span class="lab">Гнев</span><span class="track"><i style="width:74%;background:var(--anger)"></i></span><span class="val">0.74</span></div>
+          <div class="hbar"><span class="lab">Грусть</span><span class="track"><i style="width:18%;background:var(--sadness)"></i></span><span class="val">0.18</span></div>
+          <div class="hbar"><span class="lab">Нейтрально</span><span class="track"><i style="width:3%;background:var(--neutral)"></i></span><span class="val">0.03</span></div>
+          <div class="hbar"><span class="lab">Страх</span><span class="track"><i style="width:2%;background:var(--fear)"></i></span><span class="val">0.02</span></div>
+          <div class="hbar"><span class="lab">Удивление</span><span class="track"><i style="width:2%;background:var(--surprise)"></i></span><span class="val">0.02</span></div>
+          <div class="hbar"><span class="lab">Радость</span><span class="track"><i style="width:1%;background:var(--joy)"></i></span><span class="val">0.01</span></div>
+          <div class="muted mono" style="margin-top:10px">model emotion-xlmr-kkru-v0.1.0 · 398 ms</div>
+          <div class="note" style="margin-top:12px"><span class="callout">2</span>Если ML-сервис недоступен — баннер «Модель временно недоступна» (<b>MODEL_UNAVAILABLE</b>, HTTP 503), введённый текст сохраняется.</div>
+        </div>
+      </div>
+    </div>
+  </main>
+</section>
+
+<!-- ================= SCR-02 Batch upload & mapping ================= -->
+<section class="screen" id="scr-02">
+  <header>
+    <div class="logo">KZ-RU Emotions<small>v1.0</small></div>
+    <nav><span>Анализ текста</span><b>Пакетный анализ</b><span>История</span><span>Администрирование</span></nav>
+    <div class="user"><span class="lang">RU ▾</span>analyst@example.kz · Выйти</div>
+  </header>
+  <main>
+    <div class="tag">SCR-02 · UC-02, UC-03 · FR-05, FR-06</div>
+    <h1>Новый пакетный анализ</h1>
+    <div class="steps"><div class="done">1 · Файл ✓</div><div class="on">2 · Столбцы</div><div>3 · Обработка</div><div>4 · Отчёт</div></div>
+    <div class="row">
+      <div class="col" style="flex:0.9">
+        <div class="drop">
+          <div class="muted">⬆</div>
+          <div class="big">Перетащите файл сюда или выберите</div>
+          <div class="muted">CSV (UTF-8, «,» или «;»), XLSX (первый лист), TXT (одна запись на строку)<br>до 10 МБ и 50 000 строк</div>
+        </div>
+        <div class="card" style="margin-top:14px;display:flex;justify-content:space-between;align-items:center">
+          <div><b>reviews_october.csv</b><div class="muted">2,1 МБ · обнаружено 4 столбца · разделитель «;»</div></div>
+          <span class="btn ghost">Заменить</span>
+        </div>
+        <div class="note" style="margin-top:12px"><span class="callout">1</span>Проверки выполняются сразу при выборе файла: размер (<b>BATCH_TOO_LARGE</b>), формат/кодировка (<b>UNSUPPORTED_FILE</b>). Ошибка показывается на месте карточки файла.</div>
+      </div>
+      <div class="col">
+        <div class="card">
+          <h3>Сопоставление столбцов</h3>
+          <table>
+            <tr><th style="width:38%">Поле</th><th>Столбец файла</th></tr>
+            <tr><td>Текст отзыва <b style="color:var(--anger)">*</b></td><td><span class="select active">review ▾</span> <span class="muted">— определён автоматически</span></td></tr>
+            <tr><td>Дата <span class="muted">(для графика по времени)</span></td><td><span class="select">created ▾</span></td></tr>
+            <tr><td>Канал <span class="muted">(источник)</span></td><td><span class="select">source ▾</span></td></tr>
+            <tr><td>Название анализа</td><td><span class="input" style="display:block">Bank app reviews — October</span></td></tr>
+          </table>
+          <h3 style="margin-top:16px">Предпросмотр (первые 3 строки)</h3>
+          <table>
+            <tr><th>review</th><th>created</th><th>source</th></tr>
+            <tr><td>Қосымша өте баяу жұмыс істейді, ақшам екі рет есептен…</td><td>03.10.2026</td><td>App Store</td></tr>
+            <tr><td>Спасибо большое, оператор быстро решил проблему!</td><td>04.10.2026</td><td>Google Play</td></tr>
+            <tr><td>Ого, заказ бір сағатта келді, не ожидал!</td><td>04.10.2026</td><td>2GIS</td></tr>
+          </table>
+          <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:14px">
+            <span class="btn ghost">Назад</span><span class="btn primary">Запустить анализ</span>
+          </div>
+          <div class="note" style="margin-top:12px"><span class="callout">2</span>Если столбец текста не найден автоматически, поле подсвечивается и список столбцов раскрывается (<b>TEXT_COLUMN_NOT_FOUND</b>).</div>
+        </div>
+      </div>
+    </div>
+  </main>
+</section>
+
+<!-- ================= SCR-03 Processing ================= -->
+<section class="screen" id="scr-03">
+  <header>
+    <div class="logo">KZ-RU Emotions<small>v1.0</small></div>
+    <nav><span>Анализ текста</span><b>Пакетный анализ</b><span>История</span><span>Администрирование</span></nav>
+    <div class="user"><span class="lang">RU ▾</span>analyst@example.kz · Выйти</div>
+  </header>
+  <main>
+    <div class="tag">SCR-03 · UC-04 · FR-07, FR-08 (частичные результаты)</div>
+    <h1>Bank app reviews — October</h1>
+    <div class="steps"><div class="done">1 · Файл ✓</div><div class="done">2 · Столбцы ✓</div><div class="on">3 · Обработка</div><div>4 · Отчёт</div></div>
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+        <b>Обрабатывается… 3 500 из 8 412 (41,6 %)</b>
+        <span class="muted">осталось ≈ 7 мин · обновление каждые 3 с</span>
+      </div>
+      <div class="prog"><i></i></div>
+      <div class="row" style="margin-top:16px">
+        <div class="col"><div class="muted">Пропущено пустых строк</div><b>12</b></div>
+        <div class="col"><div class="muted">Обрезано длинных (&gt; 2 000)</div><b>3</b></div>
+        <div class="col"><div class="muted">Некорректных дат</div><b>0</b></div>
+        <div class="col"><div class="muted">Модель</div><b class="mono">emotion-xlmr-kkru-v0.1.0</b></div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:16px"><span class="btn ghost">Отменить</span><span class="btn">Смотреть частичные результаты</span></div>
+    </div>
+    <div class="row" style="margin-top:16px">
+      <div class="col"><div class="note"><span class="callout">1</span>Можно закрыть страницу: обработка идёт на сервере; батч появится в «Истории» со статусом.</div></div>
+      <div class="col"><div class="note"><span class="callout">2</span>Состояние <b>failed</b>: красный баннер с <b>error_message</b> и кнопкой «Повторить»; уже размеченные строки доступны.</div></div>
+      <div class="col"><div class="note"><span class="callout">3</span>По завершении (<b>completed</b>) — автоматический переход на дашборд (SCR-04).</div></div>
+    </div>
+  </main>
+</section>
+
+<!-- ================= SCR-04 Dashboard ================= -->
+<section class="screen" id="scr-04">
+  <header>
+    <div class="logo">KZ-RU Emotions<small>v1.0</small></div>
+    <nav><span>Анализ текста</span><b>Пакетный анализ</b><span>История</span><span>Администрирование</span></nav>
+    <div class="user"><span class="lang">RU ▾</span>analyst@example.kz · Выйти</div>
+  </header>
+  <main>
+    <div class="tag">SCR-04 · UC-05, UC-07 · FR-09, FR-10, FR-11, FR-12, FR-13</div>
+    <div style="display:flex;justify-content:space-between;align-items:flex-start">
+      <div><h1>Bank app reviews — October</h1><div class="sub">8 400 проанализировано · 28.09–11.10.2026 · завершено 20.10.2026 15:27</div></div>
+      <div style="display:flex;gap:10px"><span class="btn">⬇ CSV</span><span class="btn ghost">⬇ PDF-отчёт</span><span class="btn primary">Все записи →</span></div>
+    </div>
+    <div class="kpi">
+      <div class="card"><div class="muted">Негативных</div><div class="num" style="color:var(--anger)">38 %</div><div class="muted">3 192 отзыва</div></div>
+      <div class="card"><div class="muted">Самая частая эмоция</div><div class="num">Радость 31 %</div><div class="muted">гнев — 23 %</div></div>
+      <div class="card"><div class="muted">Казахский + смешанный</div><div class="num">45 %</div><div class="muted">kk 30 % · mixed 15 %</div></div>
+      <div class="card"><div class="muted">Низкая уверенность (&lt; 0,5)</div><div class="num">610</div><div class="muted">рекомендуется проверить</div></div>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <h3>Распределение эмоций</h3>
+        <div class="hbar"><span class="lab">Радость</span><span class="track"><i style="width:31%;background:var(--joy)"></i></span><span class="val">2 604 · 31 %</span></div>
+        <div class="hbar"><span class="lab">Нейтрально</span><span class="track"><i style="width:26%;background:var(--neutral)"></i></span><span class="val">2 184 · 26 %</span></div>
+        <div class="hbar"><span class="lab">Гнев</span><span class="track"><i style="width:23%;background:var(--anger)"></i></span><span class="val">1 932 · 23 %</span></div>
+        <div class="hbar"><span class="lab">Грусть</span><span class="track"><i style="width:11%;background:var(--sadness)"></i></span><span class="val">924 · 11 %</span></div>
+        <div class="hbar"><span class="lab">Удивление</span><span class="track"><i style="width:5%;background:var(--surprise)"></i></span><span class="val">420 · 5 %</span></div>
+        <div class="hbar"><span class="lab">Страх</span><span class="track"><i style="width:4%;background:var(--fear)"></i></span><span class="val">336 · 4 %</span></div>
+        <div class="note" style="margin-top:10px"><span class="callout">1</span>Клик по полосе открывает SCR-05 с фильтром по эмоции (AC-11.2).</div>
+      </div>
+      <div class="card">
+        <h3>Эмоции по языкам</h3>
+        <div style="margin:6px 0 2px">kk · 2 520</div>
+        <div class="stack"><i style="width:30%;background:var(--joy)"></i><i style="width:25%;background:var(--neutral)"></i><i style="width:25%;background:var(--anger)"></i><i style="width:12%;background:var(--sadness)"></i><i style="width:4%;background:var(--surprise)"></i><i style="width:4%;background:var(--fear)"></i></div>
+        <div style="margin:10px 0 2px">ru · 4 620</div>
+        <div class="stack"><i style="width:32%;background:var(--joy)"></i><i style="width:27.5%;background:var(--neutral)"></i><i style="width:21%;background:var(--anger)"></i><i style="width:10%;background:var(--sadness)"></i><i style="width:5.5%;background:var(--surprise)"></i><i style="width:4%;background:var(--fear)"></i></div>
+        <div style="margin:10px 0 2px">mixed · 1 260</div>
+        <div class="stack"><i style="width:29.4%;background:var(--joy)"></i><i style="width:22.5%;background:var(--neutral)"></i><i style="width:26.3%;background:var(--anger)"></i><i style="width:12.7%;background:var(--sadness)"></i><i style="width:5.2%;background:var(--surprise)"></i><i style="width:4%;background:var(--fear)"></i></div>
+        <div class="legend"><span style="--c:var(--joy)">радость</span><span style="--c:var(--neutral)">нейтрально</span><span style="--c:var(--anger)">гнев</span><span style="--c:var(--sadness)">грусть</span><span style="--c:var(--surprise)">удивление</span><span style="--c:var(--fear)">страх</span></div>
+      </div>
+      <div class="card">
+        <h3>Динамика по неделям <span class="muted" style="font-weight:400">(день · <b>неделя</b> · месяц)</span></h3>
+        <div class="colbars">
+          <div class="wk"><i style="height:30%;background:var(--joy)"></i><i style="height:26%;background:var(--neutral)"></i><i style="height:20%;background:var(--anger)"></i><i style="height:11%;background:var(--sadness)"></i></div>
+          <div class="wk"><i style="height:32%;background:var(--joy)"></i><i style="height:25%;background:var(--neutral)"></i><i style="height:30%;background:var(--anger)"></i><i style="height:11%;background:var(--sadness)"></i></div>
+        </div>
+        <div class="xlabels"><span>28.09</span><span>05.10</span></div>
+        <div class="note" style="margin-top:10px"><span class="callout">2</span>Блок скрыт, если столбец даты не задан (AC-10.2): «Добавьте столбец даты, чтобы видеть динамику».</div>
+      </div>
+      <div class="card">
+        <h3>Характерные примеры · <span class="chip c-anger">гнев</span> <span class="muted" style="font-weight:400">▾</span></h3>
+        <ol class="examples">
+          <li>«Қосымша өте баяу жұмыс істейді, ақшам екі рет есептен шығып кетті!» <span class="pill">kk</span> <span class="muted">0,87</span></li>
+          <li>«Үш күн күттім, ешкім жауап бермеді. Бұл қандай қызмет?» <span class="pill">kk</span> <span class="muted">0,79</span></li>
+          <li>«Доставка вообще кешікті, курьер телефон алмады, очень недоволен» <span class="pill">mixed</span> <span class="muted">0,74</span></li>
+        </ol>
+        <div class="muted">До 5 записей с наибольшей уверенностью (FR-13)</div>
+      </div>
+    </div>
+  </main>
+</section>
+
+<!-- ================= SCR-05 Results table ================= -->
+<section class="screen" id="scr-05">
+  <header>
+    <div class="logo">KZ-RU Emotions<small>v1.0</small></div>
+    <nav><span>Анализ текста</span><b>Пакетный анализ</b><span>История</span><span>Администрирование</span></nav>
+    <div class="user"><span class="lang">RU ▾</span>analyst@example.kz · Выйти</div>
+  </header>
+  <main>
+    <div class="tag">SCR-05 · UC-06, UC-09 · FR-08, FR-19</div>
+    <h1>Записи — Bank app reviews — October</h1>
+    <div class="filters">
+      <span class="select active">Эмоция: гнев ✕</span>
+      <span class="select active">Язык: kk ✕</span>
+      <span class="select">Тональность ▾</span>
+      <span class="select">Канал ▾</span>
+      <span class="select">Уверенность ≥ 0,0 ▾</span>
+      <span class="select">Сортировка: уверенность ↓</span>
+      <span class="muted" style="margin-left:auto">214 записей</span>
+      <span class="btn">⬇ CSV (с фильтрами)</span>
+    </div>
+    <table>
+      <tr><th style="width:72px;white-space:nowrap">№</th><th>Текст</th><th style="width:96px">Дата</th><th style="width:110px">Канал</th><th style="width:70px">Язык</th><th style="width:150px">Эмоция</th><th style="width:90px">Увер.</th></tr>
+      <tr><td style="white-space:nowrap">57</td><td>Қосымша өте баяу жұмыс істейді, ақшам екі рет есептен шығып кетті!</td><td>03.10.2026</td><td>App Store</td><td>kk</td><td><span class="chip c-anger">гнев</span> <span class="muted">✎</span></td><td>0,87</td></tr>
+      <tr><td>220</td><td>Үш күн күттім, ешкім жауап бермеді. Бұл қандай қызмет?</td><td>05.10.2026</td><td>2GIS</td><td>kk</td><td><span class="chip c-anger">гнев</span> <span class="muted">✎</span></td><td>0,79</td></tr>
+      <tr><td style="white-space:nowrap">1 304</td><td>Тағы да карта бұғатталды, қолдау қызметі тек шаблонмен жауап береді</td><td>06.10.2026</td><td>Google Play</td><td>kk</td><td><span class="chip c-anger">гнев</span> <span class="muted">✎</span></td><td>0,71</td></tr>
+      <tr style="background:#fffbea"><td style="white-space:nowrap">2 877</td><td>Курьер кешігіп келді, бірақ кешірім сұрады</td><td>08.10.2026</td><td>2GIS</td><td>kk</td><td><span class="select" style="padding:2px 8px">грусть ▾</span> <span class="pill">исправлено</span></td><td>0,48</td></tr>
+    </table>
+    <div class="pager"><span>Показано 1–50 из 214</span><span>‹ 1 <b>2</b> 3 4 5 ›</span></div>
+    <div class="row" style="margin-top:14px">
+      <div class="col"><div class="note"><span class="callout">1</span>Фильтры передаются в запрос <b>GET /batches/{id}/items?emotion=anger&amp;language=kk</b> и сохраняются в URL (можно поделиться ссылкой).</div></div>
+      <div class="col"><div class="note"><span class="callout">2</span>✎ — исправление метки (Could, FR-19): исходный прогноз сохраняется, строка помечается «исправлено».</div></div>
+      <div class="col"><div class="note"><span class="callout">3</span>Уверенность &lt; 0,5 выделяется цветом как кандидат на ручную проверку.</div></div>
+    </div>
+  </main>
+</section>
+
+<!-- ================= SCR-06 History & Admin ================= -->
+<section class="screen" id="scr-06">
+  <header>
+    <div class="logo">KZ-RU Emotions<small>v1.0</small></div>
+    <nav><span>Анализ текста</span><span>Пакетный анализ</span><span>История</span><b>Администрирование</b></nav>
+    <div class="user"><span class="lang">RU ▾</span>admin@example.kz · Выйти</div>
+  </header>
+  <main>
+    <div class="tag">SCR-06 · UC-10, UC-11, UC-12 · FR-14, FR-17, FR-18</div>
+    <h1>Администрирование</h1>
+    <div class="kpi">
+      <div class="card"><div class="muted">Активная модель</div><div class="num mono" style="font-size:16px">emotion-xlmr-kkru-v0.1.0</div></div>
+      <div class="card"><div class="muted">Очередь</div><div class="num">2</div><div class="muted">батча ожидают</div></div>
+      <div class="card"><div class="muted">За 24 ч</div><div class="num">14 / 61 230</div><div class="muted">батчей / записей</div></div>
+      <div class="card"><div class="muted">p95 /analyze</div><div class="num">640 мс</div><div class="muted">цель ≤ 1 000 мс</div></div>
+      <div class="card"><div class="muted">Состояние</div><div class="num" style="color:var(--joy)">● ok</div><div class="muted">БД · брокер · ML</div></div>
+    </div>
+    <div class="row">
+      <div class="col">
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center"><h3>API-ключи</h3><span class="btn primary">+ Новый ключ</span></div>
+          <table>
+            <tr><th>Название</th><th>Префикс</th><th>Лимит</th><th>Создан</th><th></th></tr>
+            <tr><td>Helpdesk integration</td><td class="mono">kzr_7Hq2…</td><td>120/мин</td><td>20.10.2026</td><td><span class="btn ghost">Отозвать</span></td></tr>
+            <tr><td>CRM test</td><td class="mono">kzr_Lp9d…</td><td>60/мин</td><td>12.10.2026</td><td><span class="btn ghost">Отозвать</span></td></tr>
+            <tr class="muted"><td>Old bot</td><td class="mono">kzr_x2Qa…</td><td>60/мин</td><td>01.10.2026</td><td>отозван 15.10</td></tr>
+          </table>
+          <div class="note" style="margin-top:12px"><span class="callout">1</span>После создания ключ показывается <b>один раз</b> в модальном окне с кнопкой «Скопировать» (AC-14.2).</div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center"><h3>Пользователи</h3><span class="btn">+ Пользователь</span></div>
+          <table>
+            <tr><th>E-mail</th><th>Роль</th><th>Статус</th></tr>
+            <tr><td>analyst@example.kz</td><td><span class="select">analyst ▾</span></td><td>активен</td></tr>
+            <tr><td>smm@example.kz</td><td><span class="select">analyst ▾</span></td><td>активен</td></tr>
+            <tr><td>admin@example.kz</td><td><span class="select">admin ▾</span></td><td>активен</td></tr>
+          </table>
+          <div class="note" style="margin-top:12px"><span class="callout">2</span>Раздел виден только роли admin; аналитик получает 403 и пункт меню скрыт (AC-15.3).</div>
+        </div>
+      </div>
+    </div>
+  </main>
+</section>
+
+</body>
+</html>
