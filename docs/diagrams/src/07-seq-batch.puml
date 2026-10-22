@@ -1,0 +1,59 @@
+@startuml 07-seq-batch
+' DOC-07 §7.9.2 — Sequence: batch analysis (UC-02, UC-04, UC-05 / UC-14; FR-05..FR-09)
+autonumber
+skinparam responseMessageBelowArrow true
+title Sequence — Batch analysis (asynchronous)
+
+actor "Analyst\n(Web UI)" as U
+participant "API Gateway\n+ Batch Service" as API
+database "File storage" as FS
+database "PostgreSQL" as DB
+queue "Redis broker" as Q
+participant "Batch worker\n(Processing Task)" as W
+participant "ML inference\nservice" as ML
+
+== Upload (synchronous part) ==
+U -> API : POST /api/v1/batches\n(multipart file, column map)
+API -> API : check size ≤ 10 MB, extension,\nencoding; read header only
+alt invalid file / no text column
+  API --> U : 413 / 415 / 422 with error code
+end
+API -> FS : save file
+API -> DB : INSERT batch (status = queued,\nexpires_at = now + 30 d)
+API -> Q : enqueue process_batch(batch_id)
+API --> U : 202 Accepted { batch_id, status: queued }
+
+== Processing (asynchronous part) ==
+Q -> W : deliver process_batch(batch_id)
+W -> DB : UPDATE batch SET status = processing
+W -> FS : read file
+W -> W : parse rows, skip empty,\ntruncate > 2,000 chars, parse dates
+W -> DB : bulk INSERT batch_item
+loop for each chunk of 64 items
+  W -> ML : POST /predict { texts[64] }
+  alt ML error
+    W -> W : retry with back-off (max 3)
+    opt retries exhausted
+      W -> DB : UPDATE batch SET status = failed,\nerror_message
+    end
+  else success
+    ML --> W : 64 predictions
+    W -> DB : INSERT prediction … ON CONFLICT (item_id)\nDO NOTHING  (idempotent)
+    W -> DB : UPDATE batch SET processed_count += 64
+  end
+end
+W -> DB : aggregate (GROUP BY emotion, polarity,\nlanguage, date) → INSERT batch_stats
+W -> DB : UPDATE batch SET status = completed,\nfinished_at = now
+
+== Monitoring and results ==
+loop every 3 s while status ∈ {queued, processing}
+  U -> API : GET /api/v1/batches/{id}
+  API -> DB : SELECT status, processed_count, total_count
+  API --> U : { status, progress }
+end
+U -> API : GET /api/v1/batches/{id}/stats
+API -> DB : SELECT batch_stats
+API --> U : 200 { by_emotion, by_language, timeline, … }
+U -> API : GET /api/v1/batches/{id}/items?emotion=anger&language=kk
+API --> U : 200 paginated items
+@enduml
