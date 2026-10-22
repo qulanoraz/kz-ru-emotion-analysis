@@ -1,0 +1,27 @@
+@startuml 01-system-context
+' DOC-07 §7.3 — System Context (C4 level 1)
+' Source of truth; render: see docs/diagrams/README.md
+!include <C4/C4_Context>
+
+LAYOUT_TOP_DOWN()
+title System Context — KZ-RU Emotion Analysis Platform
+
+Person(analyst, "Analyst", "Customer-support lead, SMM / social-media analyst, public-service quality analyst. Uploads feedback files and reads emotion reports.")
+Person(admin, "Administrator", "Manages user accounts, API keys and monitors the system.")
+Person(mleng, "ML Engineer", "Annotates data, trains and evaluates models, publishes model versions.")
+
+System(platform, "KZ-RU Emotion Analysis Platform", "Identifies emotions (joy, sadness, anger, fear, surprise, neutral), polarity and language (kk / ru / mixed) in Kazakh, Russian and code-switched texts. Provides REST API, batch processing and analytics dashboard.")
+
+System_Ext(extsys, "External business system", "CRM, helpdesk, chatbot or appeal-processing system of the client organisation.")
+System_Ext(sources, "Feedback sources", "App-store reviews, map/review services, social-media comments, citizen appeals — exported by the client as CSV / XLSX / TXT.")
+System_Ext(datasets, "Public datasets & models", "KazSAnDRA (Kazakh reviews, CC BY 4.0), CEDR (Russian emotions), pre-trained XLM-RoBERTa (Hugging Face Hub).")
+
+Rel(analyst, platform, "Uploads batch files, views dashboards, exports reports", "HTTPS / Web UI")
+Rel(admin, platform, "Manages users, API keys; checks status", "HTTPS / Web UI")
+Rel(extsys, platform, "Sends texts / files, receives emotion labels", "HTTPS / REST + API key")
+Rel(sources, analyst, "Feedback exported to files")
+Rel(mleng, platform, "Deploys new model versions, reads evaluation reports", "CLI / config")
+Rel(mleng, datasets, "Downloads training data and base model", "HTTPS (offline, training time only)")
+
+SHOW_LEGEND()
+@enduml

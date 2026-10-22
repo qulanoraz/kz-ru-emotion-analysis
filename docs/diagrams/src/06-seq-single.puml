@@ -1,0 +1,43 @@
+@startuml 06-seq-single
+' DOC-07 §7.9.1 — Sequence: single-text analysis (UC-01 / UC-13, FR-01..FR-04)
+autonumber
+skinparam responseMessageBelowArrow true
+title Sequence — Single-text analysis (POST /api/v1/analyze)
+
+actor "Client\n(Web UI / external system)" as C
+participant "API Gateway" as GW
+participant "Auth Module" as AUTH
+participant "Analysis Service" as AS
+participant "ML Client" as MC
+participant "ML inference service" as ML
+database "PostgreSQL" as DB
+
+C -> GW : POST /api/v1/analyze\n{ text, store? }
+GW -> AUTH : verify X-API-Key / session,\nrate limit
+alt invalid key
+  AUTH --> GW : reject
+  GW --> C : 401 UNAUTHORIZED
+else rate limit exceeded
+  AUTH --> GW : reject
+  GW --> C : 429 + Retry-After
+end
+GW -> GW : validate body\n(1..2,000 chars)
+alt invalid text
+  GW --> C : 422 TEXT_EMPTY / TEXT_TOO_LONG
+end
+GW -> AS : analyze(text, store)
+AS -> MC : predict([text])
+MC -> ML : POST /predict { texts: [text] }\n(timeout 5 s)
+ML -> ML : preprocess → language id →\ntokenise (≤512) → XLM-R → softmax\n→ polarity mapping
+alt ML service unavailable / timeout
+  MC --> AS : error
+  AS --> GW : ModelUnavailable
+  GW --> C : 503 MODEL_UNAVAILABLE
+else success
+  ML --> MC : { emotion, probabilities, language,\n  polarity, truncated, model_version }
+  MC --> AS : prediction
+  AS -> DB : INSERT analysis_log\n(metadata; text only if store = true)
+  AS --> GW : result
+  GW --> C : 200 { emotion, polarity, language,\n confidence, probabilities, model_version }
+end
+@enduml

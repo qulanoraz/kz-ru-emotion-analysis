@@ -1,0 +1,75 @@
+@startuml 04-component
+' DOC-07 §7.6 — Component Diagram (C4 level 3, DRAFT). Component names are used in the
+' traceability matrix of DOC-06 §6.7; keep them in sync.
+!include <C4/C4_Component>
+
+LAYOUT_TOP_DOWN()
+title Component Diagram (draft) — Backend API, Batch worker, ML inference service
+
+Container(web, "Web UI", "React SPA")
+System_Ext(extsys, "External system", "REST client")
+ContainerDb(db, "PostgreSQL", "Database")
+ContainerQueue(broker, "Redis", "Broker")
+ContainerDb(files, "File storage", "Volume")
+ContainerDb(models, "Model store", "Volume")
+
+Container_Boundary(api, "Backend API (FastAPI)") {
+  Component(gw, "API Gateway", "FastAPI routers, Pydantic", "Routing /analyze, /batches, /stats, /export, /admin, /health; input validation; unified error handler (FR-04)")
+  Component(auth, "Auth Module", "API-key + session auth", "Key hashing, sessions, roles, rate limiting (FR-14, FR-15, FR-17)")
+  Component(analysis, "Analysis Service", "Python", "Single-text flow, optional storage, analysis log (FR-01)")
+  Component(batchsvc, "Batch Service", "Python", "Upload validation, header check, column mapping, job creation, status state machine (FR-05..FR-07, FR-16)")
+  Component(results, "Results & Statistics Service", "SQLAlchemy queries", "Filtered/paginated items, stats, timeline, examples (FR-08..FR-10, FR-13)")
+  Component(report, "Report Service", "csv / PDF renderer", "CSV export with BOM; PDF report (FR-12)")
+  Component(mlclient, "ML Client", "httpx async", "Calls inference service with timeout, retries, circuit breaker")
+  Component(repo, "Repository layer", "SQLAlchemy 2.x ORM", "Data access for all entities; Alembic migrations")
+}
+
+Container_Boundary(worker, "Batch worker (Celery)") {
+  Component(task, "Batch Processing Task", "Celery task", "Parse file → insert items → chunked inference → idempotent upsert of predictions → progress updates")
+  Component(parser, "File Parser", "pandas / openpyxl / csv", "CSV/XLSX/TXT reading, encoding detection, date parsing (FR-05, FR-06)")
+  Component(agg, "Aggregator", "SQL GROUP BY", "Computes batch_stats after completion (FR-09, FR-10)")
+  Component(sched, "Scheduler", "Celery beat", "Retention clean-up of expired batches (FR-16, NFR-09)")
+}
+
+Container_Boundary(ml, "ML inference service (FastAPI)") {
+  Component(mlapi, "Inference API", "FastAPI", "POST /predict (1..64 texts), GET /model, GET /health")
+  Component(pre, "Preprocessor", "Python", "Unicode NFC, Kazakh letter preservation, Latin→Cyrillic transliteration hints, URL/emoji handling (FR-02)")
+  Component(langid, "Language Identifier", "Token-level classifier", "Tags kk / ru / mixed (FR-02)")
+  Component(clf, "Emotion Classifier", "XLM-R + classification head", "Tokenisation, inference, softmax, polarity mapping (FR-03)")
+  Component(loader, "Model Loader", "Python", "Loads active model version, label map, model card (MLR-07)")
+}
+
+Rel(web, gw, "HTTPS/JSON")
+Rel(extsys, gw, "HTTPS/JSON + API key")
+Rel(gw, auth, "Authenticates every request")
+Rel(gw, analysis, "/analyze")
+Rel(gw, batchsvc, "/batches")
+Rel(gw, results, "/items, /stats")
+Rel(gw, report, "/export")
+Rel(analysis, mlclient, "predict(text)")
+Rel(batchsvc, broker, "enqueue(batch_id)")
+Rel(batchsvc, files, "store upload")
+Rel(analysis, repo, "")
+Rel(batchsvc, repo, "")
+Rel(results, repo, "")
+Rel(report, results, "uses")
+Rel(auth, repo, "")
+Rel(repo, db, "SQL")
+
+Rel(broker, task, "delivers job")
+Rel(task, parser, "")
+Rel(task, mlapi, "POST /predict (chunks)")
+Rel(task, db, "items, predictions, progress")
+Rel(task, agg, "on completion")
+Rel(agg, db, "batch_stats")
+Rel(sched, db, "delete expired")
+Rel(sched, files, "delete expired files")
+Rel(parser, files, "read")
+
+Rel(mlclient, mlapi, "POST /predict")
+Rel(mlapi, pre, "")
+Rel(pre, langid, "")
+Rel(langid, clf, "")
+Rel(clf, loader, "")
+Rel(loader, models, "load")
+@enduml

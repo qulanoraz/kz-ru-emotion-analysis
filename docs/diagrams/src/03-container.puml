@@ -1,0 +1,39 @@
+@startuml 03-container
+' DOC-07 §7.5 — Container Diagram (C4 level 2). Each container = one Docker service.
+!include <C4/C4_Container>
+
+LAYOUT_LEFT_RIGHT()
+title Container Diagram — KZ-RU Emotion Analysis Platform
+
+Person(analyst, "Analyst / Administrator", "Web user")
+System_Ext(extsys, "External business system", "CRM / helpdesk")
+
+System_Boundary(platform, "KZ-RU Emotion Analysis Platform (Docker Compose)") {
+  Container(proxy, "Reverse proxy", "Nginx", "TLS termination, static files, routing /api → backend")
+  Container(web, "Web UI", "React, TypeScript, Vite", "Batch upload, progress, dashboard, export, admin pages")
+  Container(api, "Backend API", "Python 3.11, FastAPI, SQLAlchemy", "REST API /api/v1: auth, single analysis, batches, results, stats, reports, admin")
+  Container(worker, "Batch worker", "Python, Celery", "Parses batch files, calls inference in chunks, stores predictions, computes statistics, retention clean-up")
+  Container(ml, "ML inference service", "Python, FastAPI, PyTorch / ONNX Runtime", "Preprocessing, language identification, emotion classification with fine-tuned XLM-R")
+  ContainerDb(db, "Database", "PostgreSQL 16", "Users, API keys, batches, items, predictions, aggregated stats, model versions")
+  ContainerQueue(broker, "Message broker", "Redis", "Celery task queue, rate-limit counters")
+  ContainerDb(files, "File storage", "Docker volume", "Uploaded batch files and generated reports (retention 30 days)")
+  ContainerDb(models, "Model store", "Docker volume", "Versioned model artefacts: weights, tokenizer, label map, model card")
+}
+
+Rel(analyst, proxy, "Uses", "HTTPS")
+Rel(extsys, proxy, "Calls REST API", "HTTPS, X-API-Key")
+Rel(proxy, web, "Serves SPA")
+Rel(proxy, api, "Forwards /api/v1/*", "HTTP")
+Rel(web, api, "JSON requests", "HTTPS/JSON")
+Rel(api, ml, "POST /predict (single text)", "HTTP/JSON, 5 s timeout")
+Rel(api, db, "Reads / writes", "SQL")
+Rel(api, broker, "Enqueues batch jobs", "Redis protocol")
+Rel(api, files, "Stores uploads, reads reports")
+Rel(worker, broker, "Consumes jobs")
+Rel(worker, files, "Reads uploads, writes reports")
+Rel(worker, ml, "POST /predict (chunks of 64)", "HTTP/JSON")
+Rel(worker, db, "Writes items, predictions, stats", "SQL")
+Rel(ml, models, "Loads active model version at start-up")
+
+SHOW_LEGEND()
+@enduml
