@@ -1,0 +1,34 @@
+@startuml 09-deployment
+' DOC-07 §7.10 — Deployment view (single host, Docker Compose)
+!include <C4/C4_Deployment>
+
+title Deployment — single Linux host (reference server: 4 vCPU, 16 GB RAM)
+
+Deployment_Node(host, "Linux VM / server", "Ubuntu 22.04+, Docker Engine, Docker Compose") {
+  Deployment_Node(net_pub, "public network", "ports 80/443") {
+    Container(proxy, "nginx", "reverse proxy", "TLS, serves Web UI bundle")
+  }
+  Deployment_Node(net_int, "internal Docker network", "not exposed") {
+    Container(api, "backend", "FastAPI, 2 Uvicorn workers", ":8000")
+    Container(worker, "worker", "Celery, concurrency 2", "+ celery beat")
+    Container(ml, "ml-service", "FastAPI + PyTorch/ONNX", ":8001, 1 model instance")
+    ContainerDb(db, "postgres", "PostgreSQL 16", "volume pgdata")
+    ContainerQueue(redis, "redis", "Redis 7", "broker")
+  }
+  Deployment_Node(vols, "Docker volumes") {
+    ContainerDb(v_files, "uploads", "volume", "batch files, reports")
+    ContainerDb(v_models, "models", "volume", "model artefacts")
+  }
+}
+
+Rel(proxy, api, "HTTP")
+Rel(api, ml, "HTTP")
+Rel(worker, ml, "HTTP")
+Rel(api, db, "SQL")
+Rel(worker, db, "SQL")
+Rel(api, redis, "enqueue")
+Rel(worker, redis, "consume")
+Rel(api, v_files, "rw")
+Rel(worker, v_files, "rw")
+Rel(ml, v_models, "ro")
+@enduml

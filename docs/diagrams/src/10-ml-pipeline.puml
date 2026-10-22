@@ -1,0 +1,48 @@
+@startuml 10-ml-pipeline
+' DOC-07 §7.11 — Offline ML pipeline (training → evaluation → publication). MLR-01..MLR-08.
+title ML pipeline — from raw data to a published model version
+
+|Data|
+start
+:Collect sources\n• KazSAnDRA (kk reviews, CC BY 4.0)\n• CEDR (ru emotions)\n• Own public sample (kk / ru / mixed);
+:Anonymise\n(names, phones, IIN, e-mails);
+:Normalise & tag language\n(NFC, keep ә ғ қ ң ө ұ ү һ і;\nkk / ru / mixed);
+:Deduplicate\n(char n-gram cosine > 0.95);
+|Annotation|
+:Annotate with 6 emotions\n(guidelines.md);
+:Double-annotate ≥ 15 %\n→ Cohen's κ;
+if (κ ≥ 0.60 ?) then (yes)
+else (no)
+  :Revise guidelines,\nre-annotate disputed items;
+  note right: loop back until\nagreement is acceptable
+endif
+:Map CEDR labels\n(no emotion → neutral);
+:Stratified split 70 / 15 / 15\n(label × language slice);
+|Training|
+fork
+  :TF-IDF char n-grams\n+ LogReg;
+fork again
+  :mBERT\nfine-tune;
+fork again
+  :XLM-R-base\nfine-tune (primary);
+fork again
+  :mDeBERTa-v3\nfine-tune;
+end fork
+:Off-the-shelf / reference baselines\n(RuBERT-tiny2-CEDR on ru slice,\nLLM zero-shot on sample);
+|Evaluation|
+:Per-slice report\nMacro-F1, P, R, confusion matrices\n(kk, ru, mixed, informal, overall);
+:Paired bootstrap\nvs. TF-IDF baseline;
+if (MLR-06 met on every slice?) then (yes)
+  |Publication|
+  :Export model + tokenizer + label map\n(+ optional ONNX);
+  :Write model card;
+  :Register model_version\n(version, metrics) in DB;
+  :Copy to model store volume;\nrestart ml-service;
+  stop
+else (no)
+  |Training|
+  :Error analysis →\nadjust data / hyper-parameters;
+  note right: new experiment config,\nnew DIP task
+  stop
+endif
+@enduml

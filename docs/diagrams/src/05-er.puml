@@ -1,0 +1,138 @@
+@startuml 05-er
+' DOC-07 §7.8 — Logical data model (PostgreSQL). PK = primary key, FK = foreign key, U = unique.
+hide circle
+skinparam linetype ortho
+skinparam class {
+  BackgroundColor #FBFBFD
+  BorderColor #3B5B92
+}
+title Logical Data Model — PostgreSQL
+
+entity app_user {
+  * id : uuid <<PK>>
+  --
+  * email : varchar(255) <<U>>
+  * password_hash : varchar
+  * role : enum(analyst, admin)
+  * created_at : timestamptz
+}
+
+entity api_key {
+  * id : uuid <<PK>>
+  --
+  * user_id : uuid <<FK>>
+  * name : varchar(100)
+  * key_prefix : char(8)
+  * key_hash : varchar <<U>>
+  * rate_limit_per_min : int
+  * created_at : timestamptz
+  revoked_at : timestamptz
+}
+
+entity model_version {
+  * id : uuid <<PK>>
+  --
+  * name : varchar
+  * version : varchar <<U>>
+  * label_set : jsonb
+  * metrics : jsonb (Macro-F1 per slice)
+  * trained_at : timestamptz
+  * is_active : boolean
+}
+
+entity batch {
+  * id : uuid <<PK>>
+  --
+  * owner_id : uuid <<FK>>
+  * model_version_id : uuid <<FK>>
+  * original_filename : varchar
+  * file_path : varchar
+  * file_format : enum(csv, xlsx, txt)
+  column_map : jsonb
+  * status : enum(queued, processing,\n completed, failed, cancelled)
+  * total_count : int
+  * processed_count : int
+  * skipped_count : int
+  * truncated_count : int
+  * invalid_date_count : int
+  error_message : text
+  * created_at : timestamptz
+  started_at : timestamptz
+  finished_at : timestamptz
+  * expires_at : timestamptz
+}
+
+entity batch_item {
+  * id : bigint <<PK>>
+  --
+  * batch_id : uuid <<FK>>
+  * row_number : int
+  * text : text
+  item_date : timestamptz
+  channel : varchar(100)
+  * truncated : boolean
+  --
+  U(batch_id, row_number)
+}
+
+entity prediction {
+  * id : bigint <<PK>>
+  --
+  * item_id : bigint <<FK, U>>
+  * model_version_id : uuid <<FK>>
+  * emotion : enum(joy, sadness, anger,\n fear, surprise, neutral)
+  * polarity : enum(positive, negative, neutral)
+  * language : enum(kk, ru, mixed)
+  * confidence : real
+  * probabilities : jsonb
+  * created_at : timestamptz
+}
+
+entity batch_stats {
+  * batch_id : uuid <<PK, FK>>
+  --
+  * by_emotion : jsonb
+  * by_polarity : jsonb
+  * by_language : jsonb
+  * emotion_by_language : jsonb
+  timeline : jsonb
+  top_examples : jsonb
+  * computed_at : timestamptz
+}
+
+entity label_feedback {
+  * id : bigint <<PK>>
+  --
+  * prediction_id : bigint <<FK>>
+  * user_id : uuid <<FK>>
+  * corrected_emotion : enum(...)
+  * created_at : timestamptz
+}
+
+entity analysis_log {
+  * id : bigint <<PK>>
+  --
+  api_key_id : uuid <<FK>>
+  user_id : uuid <<FK>>
+  * model_version_id : uuid <<FK>>
+  * text_length : int
+  * language : enum(kk, ru, mixed)
+  * emotion : enum(...)
+  * latency_ms : int
+  stored_text : text (only if store = true)
+  * created_at : timestamptz
+}
+
+app_user ||--o{ api_key : owns
+app_user ||--o{ batch : uploads
+model_version ||--o{ batch : "used by"
+batch ||--|{ batch_item : contains
+batch_item ||--o| prediction : "has"
+model_version ||--o{ prediction : produced
+batch ||--o| batch_stats : summarised
+prediction ||--o{ label_feedback : corrected
+app_user ||--o{ label_feedback : gives
+api_key |o--o{ analysis_log : logs
+app_user |o--o{ analysis_log : logs
+model_version ||--o{ analysis_log : ""
+@enduml

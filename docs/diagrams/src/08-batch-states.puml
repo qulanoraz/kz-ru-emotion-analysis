@@ -1,0 +1,21 @@
+@startuml 08-batch-states
+' DOC-07 §7.7 — Batch lifecycle state machine (FR-07, AC-07.2)
+hide empty description
+title Batch lifecycle (batch.status)
+
+[*] --> queued : POST /batches accepted\n(file valid)
+queued --> processing : worker picks job
+queued --> cancelled : user cancels (Could)
+processing --> completed : all chunks predicted,\nstats computed
+processing --> failed : chunk failed after 3 retries\nor file cannot be parsed
+processing --> cancelled : user cancels (Could)
+failed --> queued : user re-submits (Could)
+completed --> [*] : deleted by user\nor retention job
+failed --> [*] : deleted by user\nor retention job
+cancelled --> [*] : deleted by user\nor retention job
+
+note right of processing
+  progress = processed_count / total_count
+  partial predictions remain readable
+end note
+@enduml
