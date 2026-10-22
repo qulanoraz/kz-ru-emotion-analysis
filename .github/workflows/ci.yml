@@ -1,0 +1,22 @@
+# DIP-17 / TC-CI-01: runs on every pull request and on pushes to main and develop.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main, develop]
+
+jobs:
+  docs-and-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install tools
+        run: pip install pytest pyyaml jsonschema ruff
+      - name: Lint Python scripts and tests
+        run: ruff check scripts tests --select F
+      - name: Tests (contract, traceability, backlog)
+        run: pytest -q

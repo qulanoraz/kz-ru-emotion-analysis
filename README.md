@@ -10,10 +10,10 @@
 | **Group** | SE-2406 |
 | **Supervisor** | Kamila Tanyrbergenova |
 | **Team** | Nurgaly Ashkenov — ML/NLP Engineer · Ulan Orazbek — Backend Developer & System Integrator |
-| **Issue tracker** | YouTrack project `DIP` — <YOUTRACK_PROJECT_URL> |
-| **Repository** | <GITHUB_REPOSITORY_URL> |
-| **Current milestone** | Pre-defense 1 (probationary period 1) — 24 October 2026, tag **`prob-period-1`** (alias `pre-defense-1`, same commit) |
-| **Status** | Analysis & design phase — all 11 artefacts in draft v1.0; interviews and public-data analysis in progress; no application code yet |
+| **Issue tracker** | YouTrack project `DIP` — https://kz-ru-emotion.youtrack.cloud/projects/DIP |
+| **Repository** | https://github.com/qulanoraz/kz-ru-emotion-analysis |
+| **Current milestone** | Pre-defense 1 (probationary period 1) — materials submitted 22 October 2026, pre-defense 24 October 2026; tag **`prob-period-1`** (alias `pre-defense-1`, same commit) |
+| **Status** | Analysis & design phase — all 11 artefacts in draft v1.0; first supervisor review held (SFB-01); user interviews and public-data analysis in progress; no application code yet |
 
 ---
 
@@ -73,7 +73,7 @@ There is no accessible, evaluated software solution that automatically identifie
 
 | Resource | Link |
 |---|---|
-| YouTrack project (board, tasks) | <YOUTRACK_PROJECT_URL> |
+| YouTrack project (board, tasks) | https://kz-ru-emotion.youtrack.cloud/projects/DIP |
 | Documentation (11 artefacts) | [`docs/`](docs/) — see the map below |
 | Prototype (wireframes) | [`docs/mockups/`](docs/mockups/), source [`docs/mockups/src/wireframes.html`](docs/mockups/src/wireframes.html) |
 | API contract | [`docs/api/openapi.yaml`](docs/api/openapi.yaml) (open in https://editor.swagger.io) |
@@ -85,7 +85,7 @@ There is no accessible, evaluated software solution that automatically identifie
 | # | Artifact | File | Status |
 |---|---|---|---|
 | 1 | Project proposal | [`docs/01-project-proposal.md`](docs/01-project-proposal.md) | Draft v1.0 |
-| 2 | Evidence of relevance | [`docs/02-evidence-of-relevance.md`](docs/02-evidence-of-relevance.md) | Draft v1.0 — interviews in progress |
+| 2 | Evidence of relevance | [`docs/02-evidence-of-relevance.md`](docs/02-evidence-of-relevance.md) | Draft v1.0 — desk research verified; interviews and public-data analysis in progress |
 | 3 | Literature review | [`docs/03-literature-review.md`](docs/03-literature-review.md) | Draft v1.0 |
 | 4 | Existing system comparison | [`docs/04-existing-systems.md`](docs/04-existing-systems.md) | Draft v1.0 |
 | 5 | Technology comparison | [`docs/05-technology-comparison.md`](docs/05-technology-comparison.md) | Draft v1.0 |
@@ -94,7 +94,7 @@ There is no accessible, evaluated software solution that automatically identifie
 | 8 | UX / prototype & API contracts | [`docs/08-ux-prototype.md`](docs/08-ux-prototype.md), [`docs/api/`](docs/api/), [`docs/mockups/`](docs/mockups/) | Draft v1.0 |
 | 9 | Verification and evaluation plan | [`docs/09-verification-plan.md`](docs/09-verification-plan.md) | Draft v1.0 |
 | 10 | Project management and risks | [`docs/10-project-management.md`](docs/10-project-management.md) | Draft v1.0 |
-| 11 | Supervisor feedback log | [`docs/11-supervisor-feedback.md`](docs/11-supervisor-feedback.md) | Template v1.0 — entries added after each review |
+| 11 | Supervisor feedback log | [`docs/11-supervisor-feedback.md`](docs/11-supervisor-feedback.md) | v1.1 — SFB-01 (21.10.2026) logged |
 
 ## 3. Repository structure
 
@@ -142,7 +142,7 @@ kz-ru-emotion-analysis/
 │   │   ├── processed/              # Train/val/test splits — NOT committed
 │   │   └── README.md               # Data sources, licences, how to reproduce
 │   ├── annotation/
-│   │   ├── guidelines.md           # Labelling instructions with KZ/RU/mixed examples
+│   │   ├── guidelines.md           # Labelling guidelines v0 (DIP-18) with KZ/RU/mixed examples
 │   │   └── agreement/              # Inter-annotator agreement reports
 │   ├── notebooks/                  # EDA and experiments (01-eda.ipynb …)
 │   ├── src/
@@ -215,7 +215,7 @@ flowchart LR
 There is no application code yet; the runnable parts are the documentation tooling and the contract test. Requirements: Python 3.11+, Java 11+ and Graphviz (only for diagrams).
 
 ```bash
-git clone <GITHUB_REPOSITORY_URL> && cd kz-ru-emotion-analysis
+git clone https://github.com/qulanoraz/kz-ru-emotion-analysis && cd kz-ru-emotion-analysis
 python -m venv .venv && source .venv/bin/activate      # Windows: .venv\Scripts\activate
 pip install -r requirements-dev.txt
 
@@ -255,7 +255,7 @@ python -m src.training.train --config configs/xlmr_base.yaml
 - `develop` — integration branch.
 - Feature branches are created from `develop` and named after the YouTrack issue:
   `DIP-<number>-<short-kebab-description>`
-  Examples: `DIP-32-batch-upload-endpoint`, `DIP-21-kazakh-text-normalizer`, `DIP-05-literature-review`.
+  Examples: `DIP-32-batch-upload-endpoint`, `DIP-21-kazakh-text-normalizer`, `DIP-5-literature-review`.
 
 ### 6.2 Commit messages
 
@@ -264,7 +264,7 @@ Format: `DIP-<number>: <imperative summary>` (≤ 72 chars), optional body expla
 ```text
 DIP-32: add POST /api/v1/batches endpoint with CSV validation
 DIP-21: normalize Kazakh-specific Cyrillic letters before tokenization
-DIP-03: add project proposal draft v1
+DIP-3: add project proposal draft v1
 ```
 
 Mentioning the issue ID lets YouTrack link every commit to its task (traceability).
